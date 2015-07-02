@@ -128,7 +128,7 @@
 
     $(this).removeClass('hide');
 
-    console.log('do something', alphabet.length, data.marker);
+   // console.log('do something', alphabet.length, data.marker);
     if (data.marker) {
       var el = data.table.find('[data-marker="'+data.marker+'"]');
       el.toggleClass('success');
