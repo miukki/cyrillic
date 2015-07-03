@@ -86,7 +86,6 @@
     return;
   }
 
-  //how to keep coursor for the current possition
   var replaceSymbols = function(val){
     for(var i in reverse) {
       var item = reverse[i];
@@ -113,6 +112,9 @@
     var isActive = $parent.hasClass('active');
     var val = $this.val();
 
+    //Updating an input's value without losing cursor position
+    var start = this.selectionStart, end = this.selectionEnd;
+
     if (/[A-Z]/.test(String.fromCharCode(e.which)) && /91/.test(param.previousKey)) return; //catch command+[any-symbol]
     param.previousKey = e.which;
 
@@ -126,7 +128,8 @@
 
     if (/91/.test(e.which) || /17/.test(e.which) || /16/.test(e.which) || /13/.test(e.which) || /38/.test(e.which) || /40/.test(e.which) || /37/.test(e.which) || /39/.test(e.which) || /18/.test(e.which) || e.ctrlKey) return; //commmand, ctrl, shift
 
-    $this.val(replaceSymbols(val)[0])
+    $this.val(replaceSymbols(val)[0]);
+    this.setSelectionRange(start, end);
     $helper.trigger('toggleKeyboard', { relatedTarget: this, table: $helper.find('table'), marker: replaceSymbols(val)[1] });
   }
 
