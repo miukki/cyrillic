@@ -33,11 +33,13 @@
     {l: 'y', c: 'ы'},
     {l: '\'', c: 'ь'},
     {l: 'eh', c: 'э'},
-    {l: 'ju', c: 'ю'},
+    {l: 'q', c: 'ю'},
     {l: 'ja', c: 'я'}
   ];
-  var reverse =  Array.prototype.sort.call(alphabet.slice(), function(a,b){if(a.l.length > b.l.length) return -1; return 0;});
-
+  alphabet.map(function(el,i){el.i = i+1; return el;})
+  var reverse =  Array.prototype.sort.call(alphabet.slice(), function(a,b, index){
+    return b.l.length - a.l.length;
+  });
 
 
   // CYRILLIC CLASS DEFINITION
@@ -81,21 +83,21 @@
 
     $helper.trigger('initKeyboard');
 
-    console.log('e', e.type, e.target.nodeName, 'isActive', $parent.hasClass('active'));
-
     return;
   }
 
   var replaceSymbols = function(val){
     for(var i in reverse) {
-      var item = alphabet[i];
+      var item = reverse[i];
       var re = new RegExp(item.l + '$');
       var reUp = new RegExp(item.l + '$', 'i'); //не чувствительный к регистру
+      //unicode index
+      //var u = item.l.length === 1 ? item.l.toUpperCase().charCodeAt(0) : item.l.toUpperCase().charCodeAt(0) + item.l.toUpperCase().charCodeAt(1) ;
 
       if (re.test(val)){
-        return [val.replace(re, item.c), item.c];
+        return [val.replace(re, item.c), item.i];
       } else if (reUp.test(val)) {
-        return [val.replace(reUp, item.c.toUpperCase()), item.c];
+        return [val.replace(reUp, item.c.toUpperCase()), item.i];
       }
     }
     return [val, null]//.replace(/(h|q|w)$/,'')
@@ -110,7 +112,7 @@
     var val = $this.val();
 
 
-    if (/27/.test(e.which)) return $this.blur();
+    if (/27/.test(e.which)) return $this.blur(); //esc
 
     if (!/input|textarea/i.test(e.target.tagName)) return;
 
@@ -118,12 +120,10 @@
 
     if (!isActive) $this.trigger('click');
 
-    if (/91/.test(e.which)) return;
+    if (/91/.test(e.which) || /17/.test(e.which) || /16/.test(e.which)) return; //commmand, ctrl, shift
 
-    $this.val(replaceSymbols(val)[0]);
+    $this.val(replaceSymbols(val)[0])
     $helper.trigger('toggleKeyboard', { relatedTarget: this, table: $helper.find('table'), marker: replaceSymbols(val)[1] });
-
-    console.log('e.which', e.which, /13/.test(e.which) ? 'enter': '', String.fromCharCode(e.which), '!!!', val);
 
   }
 
@@ -159,8 +159,10 @@
 
     for(var i in alphabet) {
       var item = alphabet[i];
-      trC.append($('<td data-marker="'+item.c+'"></td>').html(item.c));
-      trL.append($('<td data-marker="'+item.c+'"></td>').html(item.l))
+      //unicode index
+      //var u = item.l.length === 1 ? item.l.toUpperCase().charCodeAt(0) : item.l.toUpperCase().charCodeAt(0) + item.l.toUpperCase().charCodeAt(1) ;
+      trC.append($('<td data-marker="'+item.i+'"></td>').html(item.c));
+      trL.append($('<td data-marker="'+item.i+'"></td>').html(item.l))
     }
     $this.find('table').html('').append(trC).append(trL)
 
