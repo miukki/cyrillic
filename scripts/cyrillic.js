@@ -90,12 +90,17 @@
     for(var i in reverse) {
       var item = alphabet[i];
       var re = new RegExp(item.l + '$');
+      var reUp = new RegExp(item.l + '$', 'i'); //не чувствительный к регистру
+
       if (re.test(val)){
         return [val.replace(re, item.c), item.c];
+      } else if (reUp.test(val)) {
+        return [val.replace(reUp, item.c.toUpperCase()), item.c];
       }
     }
     return [val, null]//.replace(/(h|q|w)$/,'')
   }
+
 
   Cyrillic.prototype.keyup = function (e) {
     var $this = $(this);
@@ -113,10 +118,12 @@
 
     if (!isActive) $this.trigger('click');
 
+    if (/91/.test(e.which)) return;
+
     $this.val(replaceSymbols(val)[0]);
     $helper.trigger('toggleKeyboard', { relatedTarget: this, table: $helper.find('table'), marker: replaceSymbols(val)[1] });
 
-    //console.log('e.which', e.which, /13/.test(e.which) ? 'enter': '', String.fromCharCode(e.which), '!!!', val);
+    console.log('e.which', e.which, /13/.test(e.which) ? 'enter': '', String.fromCharCode(e.which), '!!!', val);
 
   }
 
@@ -128,12 +135,10 @@
 
     $(this).removeClass('hide');
 
-   // console.log('do something', alphabet.length, data.marker);
-    if (data.marker) {
-      var el = data.table.find('[data-marker="'+data.marker+'"]');
-      el.toggleClass('success');
-      setTimeout(function(){el.toggleClass('success');}, 500)
-    }
+    var el = data.table.find(data.marker ? '[data-marker="'+data.marker+'"]' : 'td');
+    el.toggleClass(data.marker ? 'success' : 'disabled');
+    setTimeout(function(){el.toggleClass(data.marker ? 'success' : 'disabled');}, 500)
+
   }
 
   Cyrillic.prototype.blur = function(e) {
