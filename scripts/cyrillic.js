@@ -126,17 +126,21 @@
     if (/91/.test(e.which) || /17/.test(e.which) || /16/.test(e.which) || /13/.test(e.which) || /38/.test(e.which) || /40/.test(e.which) || /37/.test(e.which) || /39/.test(e.which) || /18/.test(e.which) || e.ctrlKey) return; //commmand, ctrl, shift
 
     $this.val(replaceSymbols(val)[0]);
-    this.setSelectionRange(start, end);
 
-    console.log('e.which', e.which)
     //click on virtual-keyboard, if im click on virtual-keyboard i loosing coursor (need fix it)
     if (data && data.td) {
-      $this.val(val + data.td)
+      data.td = data.shiftKey ? data.td.toUpperCase() : data.td;
+      val = val.slice(0,start) + data.td + val.substr(start)
+      $this.val(val);
+      start++;
+      end++;
     }
+
+    //position of coursor
+    this.setSelectionRange(start, end);
 
     //highlight keyboard
     $helper.trigger('hintKeyboard', { relatedTarget: $helper.find('table'), marker: (data && data.marker) ? data.marker : replaceSymbols(val)[1] });
-
   }
 
   Cyrillic.prototype.showKeyboard = function(e) {
@@ -192,7 +196,7 @@
   Cyrillic.prototype.clickTd = function(e,d) {
     var param = e.data;
     var $td = $(this);
-    param.toggle.trigger('keyup', {td: $td.data('letter') || '', marker: $td.data('marker')})
+    param.toggle.trigger('keyup', {shiftKey: e.shiftKey, td: $td.data('letter') || '', marker: $td.data('marker')})
   }
 
   // CYRILLIC PLUGIN INIT DEFINITION
