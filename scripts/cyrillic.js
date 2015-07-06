@@ -181,21 +181,17 @@
   // ==========================
 
   $.fn.cyrillic = function (param) {
-    if (param !== 'init') return;
-
-    this
-      .on('click', toggle, Cyrillic.prototype.toggle)
-      .on('blur', toggle, Cyrillic.prototype.blur)
-      .on('keyup', toggle, {}, Cyrillic.prototype.keyup)
-      .on('hintKeyboard', helper, Cyrillic.prototype.hintKeyboard )
-      .on('initKeyboard', helper, Cyrillic.prototype.initKeyboard )
-      .on('showKeyboard', helper, Cyrillic.prototype.showKeyboard );
-
-    var $helper = this.find(helper);
-    $helper.trigger('initKeyboard');
 
   }
 
+  $(document)
+    .on('click', toggle, Cyrillic.prototype.toggle)
+    .on('blur', toggle, Cyrillic.prototype.blur)
+    .on('keyup', toggle, {}, Cyrillic.prototype.keyup)
+    .on('hintKeyboard', helper, Cyrillic.prototype.hintKeyboard )
+    .on('initKeyboard', helper, Cyrillic.prototype.initKeyboard )
+    .on('showKeyboard', helper, Cyrillic.prototype.showKeyboard )
+    .ready(function(){$(this).find(helper).trigger('initKeyboard');});
 
 
 }(jQuery);
