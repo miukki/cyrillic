@@ -23,9 +23,9 @@
     <br/>
     <br/>
 
-    <div class="form-group">
+    <div class="form-group" id="cyrillic">
       <input class="form-control" data-input-view="cyrillic" value="" placeholder="Enter text..">
-      <div data-view="alphabet" class="hide text-center"><br>
+      <div data-keyboard="cyrillic" class="hide text-center"><br>
         <table class="table table-bordered"></table>
       </div>
     </div>
@@ -41,9 +41,6 @@
     </div>
 
 
- -->
-
-<!--
     <div class="dropdown">
       <a id="dLabel" data-target="#" href="http://example.com" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">
         Dropdown trigger
@@ -54,7 +51,24 @@
         ...
       </ul>
     </div>
+
  -->
+
+
+
+    <script>
+      $('#cyrillic').cyrillic('init'); //first init plugin
+
+      //you can liste events:
+      $('#cyrillic').on('show.keyboard', function(e){
+        //..do something, e.relatedTarget
+      })
+
+      $('#cyrillic').on('hide.keyboard', function(e){
+        //..do something e.relatedTarget
+      })
+
+    </script>
 
   </div>
 

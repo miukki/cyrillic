@@ -1,7 +1,7 @@
 +function ($) {
   'use strict';
 
-  window.alphabet  =[
+  window.alphabet = [
     {l: 'a', c: 'а'},
     {l: 'b', c: 'б'},
     {l: 'v', c: 'в'},
@@ -36,6 +36,7 @@
     {l: 'q', c: 'ю'},
     {l: 'ja', c: 'я'}
   ];
+
   alphabet.map(function(el,i){el.i = i+1; return el;})
   var reverse =  Array.prototype.sort.call(alphabet.slice(), function(a,b, index){
     return b.l.length - a.l.length;
@@ -46,15 +47,12 @@
   // =========================
 
   var toggle   = '[data-input-view="cyrillic"]';
-  var helper   = '[data-view="alphabet"]';
+  var helper   = '[data-keyboard="cyrillic"]';
 
 
-  var Cyrillic = function (element) {
-    $(element).on('click.bs.dropdown', this.toggle)
-  }
+  var Cyrillic = function () {}
 
-
-  Cyrillic.VERSION = '3.3.5'
+  Cyrillic.VERSION = '0.0.1'
 
   function getParent($this) {
     return $this.parent()
@@ -72,16 +70,12 @@
 
     if (!isActive) {
 
-      $this
-        .trigger('focus');
+      $this.trigger('focus');
         //.attr('data-ouput', '');//ready for data ouput
-
-      $parent
-        .addClass('active');
+      $parent.addClass('active');
+      $helper.trigger('showKeyboard');
 
     }
-
-    $helper.trigger('initKeyboard');
 
     return;
   }
@@ -115,7 +109,10 @@
     //Updating an input's value without losing cursor position
     var start = this.selectionStart, end = this.selectionEnd;
 
-    if (/[A-Z]/.test(String.fromCharCode(e.which)) && /91/.test(param.previousKey)) return; //catch command+[any-symbol]
+    if (/[A-Z]/.test(String.fromCharCode(e.which)) && /91/.test(param.previousKey)) {
+      param.previousKey = e.which;; //catch command+[any-symbol]
+      return
+    }
     param.previousKey = e.which;
 
     if (/27/.test(e.which)) return $this.blur(); //esc
@@ -130,18 +127,23 @@
 
     $this.val(replaceSymbols(val)[0]);
     this.setSelectionRange(start, end);
-    $helper.trigger('toggleKeyboard', { relatedTarget: this, table: $helper.find('table'), marker: replaceSymbols(val)[1] });
+    $helper.trigger('hintKeyboard', { val: val, relatedTarget: $helper.find('table'), marker: replaceSymbols(val)[1] });
+
   }
 
-  Cyrillic.prototype.toggleKeyboard = function(e, data){
+  Cyrillic.prototype.showKeyboard = function(e) {
     var $this = $(this);
-    var isActive = getParent($this).hasClass('active');
-
+    var $parent  = getParent($this);
+    var isActive = $parent.hasClass('active');
     if (!isActive) return;
 
     $(this).removeClass('hide');
+    $parent.trigger(e = $.Event('show.keyboard', { relatedTarget: this }))
+  }
 
-    var el = data.table.find(data.marker ? '[data-marker="'+data.marker+'"]' : 'td');
+  Cyrillic.prototype.hintKeyboard = function(e, data){
+
+    var el = data.relatedTarget.find(data.marker ? '[data-marker="'+data.marker+'"]' : 'td');
     el.toggleClass(data.marker ? 'success' : 'disabled');
     setTimeout(function(){el.toggleClass(data.marker ? 'success' : 'disabled');}, 500)
 
@@ -152,12 +154,12 @@
     var $parent  = getParent($this);
     var $helper = $parent.find(helper);
 
-    $helper.addClass('hide').off('toggleKeyboard', Cyrillic.prototype.toggleKeyboard);
+    $helper.addClass('hide').off('hintKeyboard', Cyrillic.prototype.hintKeyboard).off('showKeyboard');
+    $parent.trigger(e = $.Event('hide.keyboard', { relatedTarget: $helper[0] }));
     $parent.removeClass('active');
   }
 
   Cyrillic.prototype.initKeyboard = function() {
-    console.log('Cyrillic.prototype.initKeyboard')
 
     var $this = $(this);
     var trC = $('<tr/>')
@@ -175,20 +177,24 @@
   }
 
 
-  // CYRILLIC PLUGIN DEFINITION
+  // CYRILLIC PLUGIN INIT DEFINITION
   // ==========================
 
+  $.fn.cyrillic = function (param) {
+    if (param !== 'init') return;
 
+    this
+      .on('click', toggle, Cyrillic.prototype.toggle)
+      .on('blur', toggle, Cyrillic.prototype.blur)
+      .on('keyup', toggle, {}, Cyrillic.prototype.keyup)
+      .on('hintKeyboard', helper, Cyrillic.prototype.hintKeyboard )
+      .on('initKeyboard', helper, Cyrillic.prototype.initKeyboard )
+      .on('showKeyboard', helper, Cyrillic.prototype.showKeyboard );
 
-  // APPLY TO EVENTS ELEMENTS
-  // ===================================
+    var $helper = this.find(helper);
+    $helper.trigger('initKeyboard');
 
-  $(document)
-    .on('click', toggle, Cyrillic.prototype.toggle)
-    .on('blur', toggle, Cyrillic.prototype.blur)
-    .on('toggleKeyboard', helper, Cyrillic.prototype.toggleKeyboard )
-    .on('initKeyboard', helper, Cyrillic.prototype.initKeyboard )
-    .on('keyup', toggle, {}, Cyrillic.prototype.keyup);
+  }
 
 
 
