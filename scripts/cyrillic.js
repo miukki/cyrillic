@@ -98,7 +98,7 @@
   }
 
 
-  Cyrillic.prototype.keyup = function (e) {
+  Cyrillic.prototype.keyup = function (e,data) {
     var param = e.data;
     var $this = $(this);
     var $parent  = getParent($this);
@@ -115,7 +115,7 @@
     }
     param.previousKey = e.which;
 
-    if (/27/.test(e.which)) return $this.blur(); //esc
+    if (/27/.test(e.which)) return $this.trigger('blur', Cyrillic.prototype.blur); //esc
 
     if (!/input|textarea/i.test(e.target.tagName)) return;
 
@@ -127,7 +127,15 @@
 
     $this.val(replaceSymbols(val)[0]);
     this.setSelectionRange(start, end);
-    $helper.trigger('hintKeyboard', { val: val, relatedTarget: $helper.find('table'), marker: replaceSymbols(val)[1] });
+
+    console.log('e.which', e.which)
+    //click on virtual-keyboard, if im click on virtual-keyboard i loosing coursor (need fix it)
+    if (data && data.td) {
+      $this.val(val + data.td)
+    }
+
+    //highlight keyboard
+    $helper.trigger('hintKeyboard', { relatedTarget: $helper.find('table'), marker: (data && data.marker) ? data.marker : replaceSymbols(val)[1] });
 
   }
 
@@ -154,14 +162,16 @@
     var $parent  = getParent($this);
     var $helper = $parent.find(helper);
 
-    $helper.addClass('hide').off('hintKeyboard', Cyrillic.prototype.hintKeyboard).off('showKeyboard');
+    $helper.addClass('hide').off('showKeyboard', Cyrillic.prototype.showKeyboard).off('hintKeyboard', Cyrillic.prototype.hintKeyboard);
     $parent.trigger(e = $.Event('hide.keyboard', { relatedTarget: $helper[0] }));
     $parent.removeClass('active');
   }
 
   Cyrillic.prototype.initKeyboard = function() {
-
     var $this = $(this);
+    var $parent  = getParent($this);
+    var $toggle  = $parent.find(toggle);
+
     var trC = $('<tr/>')
     var trL = $('<tr/>')
 
@@ -169,13 +179,21 @@
       var item = alphabet[i];
       //unicode index
       //var u = item.l.length === 1 ? item.l.toUpperCase().charCodeAt(0) : item.l.toUpperCase().charCodeAt(0) + item.l.toUpperCase().charCodeAt(1) ;
-      trC.append($('<td data-marker="'+item.i+'"></td>').html(item.c));
-      trL.append($('<td data-marker="'+item.i+'"></td>').html(item.l))
+      trC.append($('<td data-letter="'+item.c+'" data-marker="'+item.i+'"></td>').html(item.c));
+      trL.append($('<td data-letter="'+item.c+'" data-marker="'+item.i+'"></td>').html(item.l))
     }
-    $this.find('table').html('').append(trC).append(trL)
+    $this.find('table').html('').append(trC).append(trL);
+    $this.on('mousedown', 'table', function() {
+      event.preventDefault();
+    }).on('click', 'td', {toggle: $toggle}, Cyrillic.prototype.clickTd);
 
   }
 
+  Cyrillic.prototype.clickTd = function(e,d) {
+    var param = e.data;
+    var $td = $(this);
+    param.toggle.trigger('keyup', {td: $td.data('letter') || '', marker: $td.data('marker')})
+  }
 
   // CYRILLIC PLUGIN INIT DEFINITION
   // ==========================
