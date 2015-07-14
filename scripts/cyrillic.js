@@ -92,7 +92,7 @@
   // =========================
 
   var toggle   = '[data-input-view="cyrillic"]';
-  var helper   = '[data-keyboard="cyrillic"]';
+  var helper   = 'div[data-keyboard="cyrillic"]';
 
 
   var Cyrillic = function () {}
@@ -107,7 +107,7 @@
   Cyrillic.prototype.toggle = function (e) {
     var $this = $(this);
     var $parent  = getParent($this);
-    var $helper = $parent.find(helper);
+    var $helper = $(helper);
     var isActive = $parent.hasClass('active');
 
 
@@ -147,7 +147,7 @@
     var param = e.data;
     var $this = $(this);
     var $parent  = getParent($this);
-    var $helper = $parent.find(helper);
+    var $helper = $(helper);
     var isActive = $parent.hasClass('active');
     var val = $this.val();
 
@@ -189,12 +189,9 @@
 
   Cyrillic.prototype.showKeyboard = function(e) {
     var $this = $(this);
-    var $parent  = getParent($this);
-    var isActive = $parent.hasClass('active');
-    if (!isActive) return;
 
-    $(this).removeClass('hide');
-    $parent.trigger(e = $.Event('show.keyboard', { relatedTarget: this }))
+    $this.removeClass('hide');
+    $this.trigger(e = $.Event('show.keyboard', { relatedTarget: undefined }))
   }
 
   Cyrillic.prototype.hintKeyboard = function(e, data){
@@ -208,10 +205,10 @@
   Cyrillic.prototype.blur = function(e) {
     var $this = $(this);
     var $parent  = getParent($this);
-    var $helper = $parent.find(helper);
+    var $helper = $(helper);
 
     $helper.addClass('hide').off('showKeyboard', Cyrillic.prototype.showKeyboard).off('hintKeyboard', Cyrillic.prototype.hintKeyboard);
-    $parent.trigger(e = $.Event('hide.keyboard', { relatedTarget: $helper[0] }));
+    $helper.trigger(e = $.Event('hide.keyboard', { relatedTarget: undefined }));
     $parent.removeClass('active');
   }
 
