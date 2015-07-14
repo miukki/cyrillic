@@ -1,7 +1,47 @@
 +function ($) {
   'use strict';
 
-  window.alphabet = [
+  //setSelectionRange for ie8
+
+
+  $.fn.setSelectionRange = function(start, end) {
+    if(!end) end = start;
+    return this.each(function() {
+        if (this.setSelectionRange) {
+            this.setSelectionRange(start, end);
+        } else if (this.createTextRange) {
+            var range = this.createTextRange();
+            range.collapse(true);
+            range.moveEnd('character', end);
+            range.moveStart('character', start);
+            range.select();
+        }
+    });
+  };
+
+  function getCaret(el) {
+    if (el.selectionStart) {
+      return el.selectionStart;
+    } else if (document.selection) {
+      el.focus();
+
+      var r = document.selection.createRange();
+      if (r == null) {
+        return 0;
+      }
+
+      var re = el.createTextRange(),
+          rc = re.duplicate();
+      re.moveToBookmark(r.getBookmark());
+      rc.setEndPoint('EndToStart', re);
+
+      return rc.text.length;
+    }
+    return 0;
+  }
+
+
+  var alphabet = [
     {l: 'a', c: 'а'},
     {l: 'b', c: 'б'},
     {l: 'v', c: 'в'},
@@ -37,7 +77,12 @@
     {l: 'ja', c: 'я'}
   ];
 
-  alphabet.map(function(el,i){el.i = i+1; return el;})
+  if (!Array.prototype.map && (typeof _ === 'function')) {
+    alphabet = _.map(alphabet, function(el,i){el.i = i+1; return el;})
+  } else {
+    alphabet.map(function(el,i){el.i = i+1; return el;})
+  }
+
   var reverse =  Array.prototype.sort.call(alphabet.slice(), function(a,b, index){
     return b.l.length - a.l.length;
   });
@@ -107,7 +152,7 @@
     var val = $this.val();
 
     //Updating an input's value without losing cursor position
-    var start = this.selectionStart, end = this.selectionEnd;
+    var start = this.selectionStart || getCaret(this);
 
     if (/[A-Z]/.test(String.fromCharCode(e.which)) && /91/.test(param.previousKey)) {
       param.previousKey = e.which;; //catch command+[any-symbol]
@@ -133,11 +178,10 @@
       val = val.slice(0,start) + data.td + val.substr(start)
       $this.val(val);
       start++;
-      end++;
     }
 
     //position of coursor
-    this.setSelectionRange(start, end);
+    $(this).setSelectionRange(start);
 
     //highlight keyboard
     $helper.trigger('hintKeyboard', { relatedTarget: $helper.find('table'), marker: (data && data.marker) ? data.marker : replaceSymbols(val)[1] });
