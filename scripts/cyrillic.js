@@ -2,8 +2,6 @@
   'use strict';
 
   //setSelectionRange for ie8
-
-
   $.fn.setSelectionRange = function(start, end) {
     if(!end) end = start;
     return this.each(function() {
@@ -30,8 +28,7 @@
         return 0;
       }
 
-      var re = el.createTextRange(),
-          rc = re.duplicate();
+      var re = el.createTextRange(), rc = re.duplicate();
       re.moveToBookmark(r.getBookmark());
       rc.setEndPoint('EndToStart', re);
 
@@ -152,7 +149,8 @@
     var val = $this.val();
 
     //Updating an input's value without losing cursor position
-    var start = this.selectionStart || getCaret(this);
+    var start = getCaret(this);
+    var end = this.selectionEnd;
 
     if (/[A-Z]/.test(String.fromCharCode(e.which)) && /91/.test(param.previousKey)) {
       param.previousKey = e.which;; //catch command+[any-symbol]
@@ -178,10 +176,11 @@
       val = val.slice(0,start) + data.td + val.substr(start)
       $this.val(val);
       start++;
+      end++;
     }
 
     //position of coursor
-    $(this).setSelectionRange(start);
+    $(this).setSelectionRange(start, end);
 
     //highlight keyboard
     $helper.trigger('hintKeyboard', { relatedTarget: $helper.find('table'), marker: (data && data.marker) ? data.marker : replaceSymbols(val)[1] });
